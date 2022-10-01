@@ -11,11 +11,11 @@ df = pd.DataFrame(
         "Title",
         "Location",
         "Company",
-        "Salary",
         "Link",
         "Description",
-        "Logo",
         "Time",
+        "Salary",
+        "Logo",
     ]
 )
 
@@ -28,16 +28,22 @@ def Widgets():
     root.searchText = Entry(root, width=35, textvariable=search_key, font="Arial 14")
     root.searchText.grid(row=2, column=1, pady=5, padx=5, columnspan=2)
 
+    page_label = Label(root, text="Number of pages :", pady=5, padx=5)
+    page_label.grid(row=3, column=0, pady=5, padx=5)
+
+    root.pageNum = Entry(root, width=35, textvariable=pages, font="Arial 14")
+    root.pageNum.grid(row=3, column=1, pady=5, padx=5, columnspan=2)
+
     destination_label = Label(root, text="Destination :", pady=5, padx=9)
-    destination_label.grid(row=3, column=0, pady=5, padx=5)
+    destination_label.grid(row=4, column=0, pady=5, padx=5)
 
     root.destinationText = Entry(
         root, width=27, textvariable=download_Path, font="Arial 14"
     )
-    root.destinationText.grid(row=3, column=1, pady=5, padx=5)
+    root.destinationText.grid(row=4, column=1, pady=5, padx=5)
 
     browse_B = Button(root, text="Browse", command=Browse, width=10, relief=GROOVE)
-    browse_B.grid(row=3, column=2, pady=1, padx=1)
+    browse_B.grid(row=4, column=2, pady=1, padx=1)
 
     LinkedIn = Button(
         root,
@@ -49,7 +55,7 @@ def Widgets():
         relief=GROOVE,
         font="Georgia, 13",
     )
-    LinkedIn.grid(row=4, column=1, pady=10, padx=10)
+    LinkedIn.grid(row=5, column=1, pady=10, padx=10)
 
     Wuzzuf = Button(
         root,
@@ -61,7 +67,7 @@ def Widgets():
         relief=GROOVE,
         font="Georgia, 13",
     )
-    Wuzzuf.grid(row=5, column=1, pady=10, padx=10)
+    Wuzzuf.grid(row=6, column=1, pady=10, padx=10)
 
 
 def Browse():
@@ -76,12 +82,14 @@ def Browse():
 def scrapLinkedIn():
     key = search_key.get()
     download_Folder = download_Path.get()
+    p = pages.get()
     urls = []
-    for i in range(0, 3):
+    global df
+    for i in range(0, p):
         urls.append(
             f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={key}&amp;trk=public_jobs_jobs-search-bar_search-submit&amp;position=1&amp;pageNum=0&amp;start={i}"
         )
-    global df
+
     for url in urls:
         r = BeautifulSoup(requests.get(url).content, "html.parser")
         jobs = r.find_all(
@@ -173,20 +181,83 @@ def scrapLinkedIn():
 def scrapWuzzuf():
     key = search_key.get()
     download_Folder = download_Path.get()
+    p = pages.get()
+    global df
+    urls = []
+    for i in range(0, p):
+        urls.append(f"https://wuzzuf.net/search/jobs/?a=navbg&q={key}&start={i}")
+    for url in urls:
+        headers = {
+            "Connection": "keep-alive",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36",
+        }
+        r = BeautifulSoup(
+            requests.get(url, headers=headers, timeout=120).content, "html.parser"
+        )
+        jobs = r.find_all(
+            "div",
+            class_="css-1gatmva e1v1l3u10",
+        )
+        time.sleep(5)
+        for job in jobs:
+            job_link = f'https://wuzzuf.net{job.find("a", class_="css-o171kl")["href"]}'
+            title = job.find("a", class_="css-o171kl").text.strip().encode("utf-8")
+            title = codecs.decode(title)
+            location = (
+                job.find("span", class_="css-5wys0k").text.strip().encode("utf-8")
+            )
+            location = codecs.decode(location)
+            company = job.find("a", class_="css-17s97q8").text.strip().encode("utf-8")
+            company = codecs.decode(company).replace("-", "")
 
+            job_r = BeautifulSoup(
+                requests.get(job_link, headers=headers, timeout=120).content,
+                "html.parser",
+            )
+            time.sleep(5)
+            try:
+                description = (
+                    job_r.find("div", class_="css-1uobp1k").text.strip().encode("utf-8")
+                )
+                description = codecs.decode(description)
+            except:
+                description = "No info"
+            try:
+                job_time = (
+                    job_r.find("span", class_="css-182mrdn")
+                    .text.strip()
+                    .encode("utf-8")
+                )
+                job_time = codecs.decode(job_time)
+            except:
+                job_time = "No info"
 
-##TODO: complete wuzzuf function
+            df = df.append(
+                {
+                    "Title": title,
+                    "Location": location,
+                    "Company": company,
+                    "Link": job_link,
+                    "Description": description,
+                    "Time": job_time,
+                },
+                ignore_index=True,
+            )
+
+    download_Folder = download_Path.get()
+    df.to_csv(f"{download_Folder}\jobs.csv")
+
 
 root = Tk()
 
 
-root.geometry("520x250")
+root.geometry("520x350")
 root.resizable(False, False)
 root.title("Job scraper")
 
 search_key = StringVar()
 download_Path = StringVar()
-
+pages = IntVar()
 Widgets()
 
 
