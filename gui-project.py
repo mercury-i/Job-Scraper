@@ -42,7 +42,14 @@ def Widgets():
     )
     root.destinationText.grid(row=4, column=1, pady=5, padx=5)
 
-    browse_B = Button(root, text="Browse", command=Browse, width=10, relief=GROOVE)
+    browse_B = Button(
+        root,
+        text="Browse",
+        command=Browse,
+        width=10,
+        relief=GROOVE,
+        background="#19456B",
+    )
     browse_B.grid(row=4, column=2, pady=1, padx=1)
 
     LinkedIn = Button(
@@ -54,6 +61,8 @@ def Widgets():
         padx=15,
         relief=GROOVE,
         font="Georgia, 13",
+        background="#11698E",
+        activebackground="#16C79A",
     )
     LinkedIn.grid(row=5, column=1, pady=10, padx=10)
 
@@ -66,6 +75,8 @@ def Widgets():
         padx=15,
         relief=GROOVE,
         font="Georgia, 13",
+        background="#11698E",
+        activebackground="#16C79A",
     )
     Wuzzuf.grid(row=6, column=1, pady=10, padx=10)
 
@@ -251,10 +262,10 @@ def scrapWuzzuf():
 root = Tk()
 
 
-root.geometry("520x350")
+root.geometry("520x300")
 root.resizable(False, False)
 root.title("Job scraper")
-
+root.configure(bg="#F8F1F1")
 search_key = StringVar()
 download_Path = StringVar()
 pages = IntVar()
