@@ -5,5 +5,8 @@ A GUI for scraping job data (Only for educational purposes) using Tkinter. Part 
 
 
 
-https://user-images.githubusercontent.com/90464702/193457309-3a639f23-7fce-434e-9f27-dfccc4f2072a.mp4
+
+
+
+https://user-images.githubusercontent.com/90464702/193457452-5644a9d7-bb87-494b-a9e0-a4b31727e323.mp4
 
