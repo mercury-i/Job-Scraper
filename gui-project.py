@@ -5,6 +5,10 @@ import pandas as pd
 import codecs
 from tkinter import *
 from tkinter import filedialog
+from tkinter import messagebox
+from tkinter.ttk import Progressbar
+import threading
+
 
 df = pd.DataFrame(
     columns=[
@@ -55,7 +59,7 @@ def Widgets():
     LinkedIn = Button(
         root,
         text="LinkedIn",
-        command=scrapLinkedIn,
+        command=startscrapLinkedIn,
         width=20,
         pady=10,
         padx=15,
@@ -69,7 +73,7 @@ def Widgets():
     Wuzzuf = Button(
         root,
         text="Wuzzuf",
-        command=scrapWuzzuf,
+        command=startscrapWuzzuf,
         width=20,
         pady=10,
         padx=15,
@@ -91,6 +95,8 @@ def Browse():
 
 
 def scrapLinkedIn():
+    progress = Progressbar(root, orient="horizontal", mode="determinate", length=280)
+    progress.grid(row=7, column=1, pady=1, padx=1)
     key = search_key.get()
     download_Folder = download_Path.get()
     p = pages.get()
@@ -185,11 +191,19 @@ def scrapLinkedIn():
                 },
                 ignore_index=True,
             )
+            root.update_idletasks()
+            progress["value"] += 100 * (1 / len(jobs)) / p
     download_Folder = download_Path.get()
     df.to_csv(f"{download_Folder}\jobs.csv")
+    messagebox.showinfo(
+        " ",
+        "Done!",
+    )
 
 
 def scrapWuzzuf():
+    progress = Progressbar(root, orient="horizontal", mode="determinate", length=280)
+    progress.grid(row=7, column=1, pady=1, padx=1)
     key = search_key.get()
     download_Folder = download_Path.get()
     p = pages.get()
@@ -254,9 +268,22 @@ def scrapWuzzuf():
                 },
                 ignore_index=True,
             )
-
+            root.update_idletasks()
+            progress["value"] += 100 * (1 / len(jobs)) / p
     download_Folder = download_Path.get()
     df.to_csv(f"{download_Folder}\jobs.csv")
+    messagebox.showinfo(" ", "Done!")
+
+
+# Using threads to solve 'unresponsive' issue
+
+
+def startscrapLinkedIn():
+    threading.Thread(target=scrapLinkedIn).start()
+
+
+def startscrapWuzzuf():
+    threading.Thread(target=scrapWuzzuf).start()
 
 
 root = Tk()
@@ -269,6 +296,7 @@ root.configure(bg="#F8F1F1")
 search_key = StringVar()
 download_Path = StringVar()
 pages = IntVar()
+pages.set(1)
 Widgets()
 
 

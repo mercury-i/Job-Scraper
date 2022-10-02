@@ -1,0 +1,4 @@
+build
+dist
+gui-project.spec
+scraper.mp4
